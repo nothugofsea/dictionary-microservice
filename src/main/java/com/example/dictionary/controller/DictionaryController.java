@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +34,11 @@ public class DictionaryController {
             })
     public DictionaryDto createDictionary(@RequestBody CreateDictionaryDto dictionaryDto) {
         Dictionary dictionary = dictionaryService.createDictionary(
-            Dictionary
-                .builder()
-                .code(dictionaryDto.getCode())
-                .description(dictionaryDto.getDescription())
-                .build()
+                Dictionary
+                        .builder()
+                        .code(dictionaryDto.getCode())
+                        .description(dictionaryDto.getDescription())
+                        .build()
         );
         return new DictionaryDto(dictionary.getId(), dictionary.getCode(), dictionary.getDescription());
     }
@@ -48,7 +50,7 @@ public class DictionaryController {
                             description = "List of dictionaries",
                             content = @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema (schema = @Schema(implementation = DictionaryDto.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = DictionaryDto.class))
                             )
                     )
             })
@@ -58,11 +60,11 @@ public class DictionaryController {
 
         for (Dictionary dictionary : dictionaries) {
             dictionariesDtos.add(
-                new DictionaryDto(
-                    dictionary.getId(),
-                    dictionary.getCode(),
-                    dictionary.getDescription()
-                )
+                    new DictionaryDto(
+                            dictionary.getId(),
+                            dictionary.getCode(),
+                            dictionary.getDescription()
+                    )
             );
         }
 
@@ -79,11 +81,17 @@ public class DictionaryController {
                                     schema = @Schema(implementation = DictionaryDto.class))
                     ),
                     @ApiResponse(responseCode = "404",
-                            description = "Dictionary not found")
+                            description = "Dictionary not found",
+                            content = @Content(schema = @Schema())
+                    )
             })
     public DictionaryDto getDictionaryById(@PathVariable UUID id) {
         Dictionary dictionary = dictionaryService.getDictionaryById(id);
-        // TODO: Add error send if no data exists
+
+        if (dictionary == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", id));
+        }
+
         return new DictionaryDto(dictionary.getId(), dictionary.getCode(), dictionary.getDescription());
     }
 
@@ -96,7 +104,12 @@ public class DictionaryController {
                             description = "Dictionary not found")
             })
     public void deleteDictionary(@PathVariable UUID id) {
-        // TODO: Add error send if no data exists
+        Dictionary dictionary = dictionaryService.getDictionaryById(id);
+
+        if (dictionary == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", id));
+        }
+
         dictionaryService.deleteDictionary(id);
     }
 }

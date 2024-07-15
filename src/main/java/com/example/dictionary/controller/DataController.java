@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +29,24 @@ public class DataController {
     @Autowired
     private DictionaryService dictionaryService;
 
-    @PostMapping("/dictionaries/{id}/records")
+    @PostMapping("/records")
     @Operation(summary = "Create a new record in a dictionary",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Record created successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DataDto.class)))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DataDto.class))),
+                    @ApiResponse(responseCode = "404",
+                            description = "Dictionary not found",
+                            content = @Content(schema = @Schema())
+                    )
             })
-    public DataDto createDataRecord(@RequestBody CreateDataDto dataDto, @PathVariable UUID id) {
-        Dictionary dictionary = dictionaryService.getDictionaryById(id);
+    public DataDto createDataRecord(@RequestBody CreateDataDto dataDto) {
+        Dictionary dictionary = dictionaryService.getDictionaryById(dataDto.getDictionary());
+
+        if (dictionary == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", dataDto.getDictionary()));
+        }
+
         Data data = Data.builder().code(dataDto.getCode()).value(dataDto.getValue()).dictionary(dictionary).build();
         Data createdData = dataService.createData(data);
         return new DataDto(
@@ -75,6 +86,45 @@ public class DataController {
         return dataDtos;
     }
 
+    @GetMapping("/dictionaries/{id}/records")
+    @Operation(summary = "Get all data records by dictionary id",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "List of data records",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema( schema = @Schema(implementation = DataDto.class))
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404",
+                            description = "Dictionary not found",
+                            content = @Content(schema = @Schema())
+                    )
+            })
+    public List<DataDto> getAllDataRecordsByDictionaryId(@PathVariable UUID id) {
+        Dictionary dictionary = dictionaryService.getDictionaryById(id);
+
+        if (dictionary == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", id));
+        }
+
+        List<Data> dataRecords = dataService.getAllDataByDictionaryId(id);
+        List<DataDto> dataDtos = new ArrayList<>();
+
+        for (Data data : dataRecords) {
+            dataDtos.add(
+                    new DataDto(
+                            data.getId(),
+                            data.getDictionary().getId(),
+                            data.getCode(),
+                            data.getValue()
+                    )
+            );
+        }
+
+        return dataDtos;
+    }
+
     @GetMapping("/records/{id}")
     @Operation(summary = "Get data record by ID",
             responses = {
@@ -86,12 +136,17 @@ public class DataController {
                             )
                     ),
                     @ApiResponse(responseCode = "404",
-                            description = "Data record not found")
+                            description = "Data not found",
+                            content = @Content(schema = @Schema())
+                    )
             })
     public DataDto getDataRecordById(@PathVariable UUID id) {
         Data data = dataService.getDataById(id);
 
-        // TODO: Add error send if no data exists
+        if (data == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Data record not found with id: %s", id));
+        }
+
         return new DataDto(data.getId(), data.getDictionary().getId(), data.getCode(), data.getValue());
     }
 
@@ -104,7 +159,12 @@ public class DataController {
                             description = "Data record not found")
             })
     public void deleteDataRecord(@PathVariable UUID id) {
-        // TODO: Add error send if no data exists
+        Data data = dataService.getDataById(id);
+
+        if (data == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Data record not found with id: %s", id));
+        }
+
         dataService.deleteData(id);
     }
 }

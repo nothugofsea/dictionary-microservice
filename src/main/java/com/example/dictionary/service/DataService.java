@@ -22,6 +22,10 @@ public class DataService {
         return dataRepository.findAll();
     }
 
+    public List<Data> getAllDataByDictionaryId(UUID dictionaryId) {
+        return dataRepository.findByDictionaryId(dictionaryId);
+    }
+
     public Data getDataById(UUID id) {
         return dataRepository.findById(id).orElse(null);
     }
