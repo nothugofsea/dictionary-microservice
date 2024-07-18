@@ -16,7 +16,7 @@ public class DataDto {
     private UUID id;
 
     @Schema(description = "Reference to the dictionary", example = "123e4567-e89b-12d3-a456-556642440000")
-    private UUID dictionary;
+    private UUID dictionaryId;
 
     @Schema(description = "Code of the data record", example = "001")
     private String code;

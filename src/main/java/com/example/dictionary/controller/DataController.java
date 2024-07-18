@@ -38,7 +38,7 @@ public class DataController {
         try {
             return dataService.createData(dataDto);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", dataDto.getDictionary()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Dictionary record not found with id: %s", dataDto.getDictionaryId()));
         }
     }
 

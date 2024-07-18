@@ -16,6 +16,9 @@ public class CreateDataDto {
     @Schema(description = "Value of the data record", example = "Hello", requiredMode = Schema.RequiredMode.REQUIRED)
     private String value;
 
-    @Schema(description = "Reference to the dictionary", example = "123e4567-e89b-12d3-a456-556642440000", requiredMode = Schema.RequiredMode.REQUIRED)
-    private UUID dictionary;
+    @Schema(description = "Reference to the dictionary", example = "123e4567-e89b-12d3-a456-556642440000", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private UUID dictionaryId;
+
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private CreateDictionaryDto dictionary;
 }

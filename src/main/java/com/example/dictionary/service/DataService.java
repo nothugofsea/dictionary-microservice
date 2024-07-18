@@ -23,7 +23,18 @@ public class DataService {
     }
 
     public DataDto createData(CreateDataDto dataDto) {
-        Dictionary dictionary = dictionaryRepository.findById(dataDto.getDictionary()).orElseThrow();
+        Dictionary dictionary;
+
+        if (dataDto.getDictionary() != null) {
+            dictionary = dictionaryRepository.save(
+                    Dictionary.builder()
+                            .code(dataDto.getDictionary().getCode())
+                            .description(dataDto.getDictionary().getDescription())
+                            .build()
+            );
+        } else {
+            dictionary = dictionaryRepository.findById(dataDto.getDictionaryId()).orElseThrow();
+        }
 
         Data data = Data.builder().code(dataDto.getCode()).value(dataDto.getValue()).dictionary(dictionary).build();
         Data createdData = dataRepository.save(data);
