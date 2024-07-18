@@ -6,7 +6,6 @@ import com.example.dictionary.model.Data;
 import com.example.dictionary.model.Dictionary;
 import com.example.dictionary.repository.DataRepository;
 import com.example.dictionary.repository.DictionaryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,12 +14,13 @@ import java.util.UUID;
 
 @Service
 public class DataService {
+    private final DataRepository dataRepository;
+    private final DictionaryRepository dictionaryRepository;
 
-    @Autowired
-    private DataRepository dataRepository;
-
-    @Autowired
-    private DictionaryRepository dictionaryRepository;
+    public DataService(DataRepository dataRepository, DictionaryRepository dictionaryRepository) {
+        this.dataRepository = dataRepository;
+        this.dictionaryRepository = dictionaryRepository;
+    }
 
     public DataDto createData(CreateDataDto dataDto) {
         Dictionary dictionary = dictionaryRepository.findById(dataDto.getDictionary()).orElseThrow();

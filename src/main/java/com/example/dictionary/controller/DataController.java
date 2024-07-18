@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,12 +17,13 @@ import java.util.UUID;
 
 @RestController
 public class DataController {
+    private final DataService dataService;
 
-    @Autowired
-    private DataService dataService;
+    public DataController(DataService dataService) {
+        this.dataService = dataService;
+    }
 
-
-    @PostMapping("/records")
+    @PostMapping("/data")
     @Operation(summary = "Create a new record in a dictionary",
             responses = {
                     @ApiResponse(responseCode = "200",
@@ -42,7 +42,7 @@ public class DataController {
         }
     }
 
-    @GetMapping("/records")
+    @GetMapping("/data")
     @Operation(summary = "Get all data records",
             responses = {
                     @ApiResponse(responseCode = "200",
@@ -57,7 +57,7 @@ public class DataController {
         return dataService.getAllData();
     }
 
-    @GetMapping("/dictionaries/{id}/records")
+    @GetMapping("/dictionaries/{id}/data")
     @Operation(summary = "Get all data records by dictionary id",
             responses = {
                     @ApiResponse(responseCode = "200",
@@ -80,7 +80,7 @@ public class DataController {
         }
     }
 
-    @GetMapping("/records/{id}")
+    @GetMapping("/data/{id}")
     @Operation(summary = "Get data record by ID",
             responses = {
                     @ApiResponse(responseCode = "200",
@@ -103,7 +103,7 @@ public class DataController {
         }
     }
 
-    @DeleteMapping("/records/{id}")
+    @DeleteMapping("/data/{id}")
     @Operation(summary = "Delete data record by ID",
             responses = {
                     @ApiResponse(responseCode = "204",

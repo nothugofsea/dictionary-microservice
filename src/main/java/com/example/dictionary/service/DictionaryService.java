@@ -4,7 +4,6 @@ import com.example.dictionary.dto.CreateDictionaryDto;
 import com.example.dictionary.dto.DictionaryDto;
 import com.example.dictionary.model.Dictionary;
 import com.example.dictionary.repository.DictionaryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,9 +12,11 @@ import java.util.UUID;
 
 @Service
 public class DictionaryService {
+    private final DictionaryRepository dictionaryRepository;
 
-    @Autowired
-    private DictionaryRepository dictionaryRepository;
+    public DictionaryService(DictionaryRepository dictionaryRepository) {
+        this.dictionaryRepository = dictionaryRepository;
+    }
 
     public DictionaryDto createDictionary(CreateDictionaryDto dictionaryDto) {
         Dictionary dictionary = Dictionary
